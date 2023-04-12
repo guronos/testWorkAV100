@@ -96,7 +96,7 @@
 </div>
 <div class="d-flex setting-block">
   <div class="setting-title">
-    Переход в карточку <font-awesome-icon :icon="['fas', 'house']" />
+    Переход в карточку 
   </div>
   <div class="setting-body">
     Выберите, каким образом будет открываться детальное представление выбранного вами транспорта.
