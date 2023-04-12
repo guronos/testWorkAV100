@@ -69,12 +69,16 @@
                   class="black--text"
                 ></v-radio>
                 <v-divider class="mb-2 pb-4"/>
-                <v-radio
+                <div class="d-flex justify-space-between"><v-radio
                   label="Push"
                   color="primary"
                   value="push"
-                  disabled
-                ></v-radio>
+                  readonly
+                ></v-radio><v-tooltip bottom color="#26a763">
+        <template v-slot:activator="{ on, attrs }"><div class="notification-tooltip" v-bind="attrs"
+            v-on="on">i</div> </template>
+        <span>Можно установить только в приложении</span>
+      </v-tooltip></div>
                 <v-divider class="mb-2 pb-4"/>
                 <v-radio
                   label="Email"
@@ -92,7 +96,7 @@
 </div>
 <div class="d-flex setting-block">
   <div class="setting-title">
-    Переход в карточку
+    Переход в карточку <font-awesome-icon :icon="['fas', 'house']" />
   </div>
   <div class="setting-body">
     Выберите, каким образом будет открываться детальное представление выбранного вами транспорта.
@@ -187,5 +191,13 @@ margin-bottom: 2rem;
   font-size: 1.4rem !important;
   color: rgba(0, 0, 0, 1) !important;
   font-weight: 400 !important;
+}
+.notification-tooltip {
+  border: 1px solid #00000070;
+  border-radius: 20px;
+  width: 2.2rem;
+  height: 2.2rem;
+  text-align: center;
+  color: #00000070;
 }
 </style>
