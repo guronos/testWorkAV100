@@ -17,6 +17,9 @@ export const mutations = {
     state.userToken = data.token;
     state.userId = data.user.id;
   },
+  /**
+   * Из ответа собираем только нужные данные, чтоб не нагружать localStorage
+   */
   saveUserData(state, data) {
     state.userData.companyName = data.companyname;
     state.userData.userName = data.fname;
@@ -31,6 +34,9 @@ export const mutations = {
 };
 
 export const actions = {
+  /**
+   * В данном хуке мы не только авторизуемся, но и сибираем данные о пользователе.
+   */
   async nuxtServerInit({ commit }) {
     try {
       const afterAuthorization = await this.$axios.$post(

@@ -378,6 +378,10 @@ export default {
       },
     };
   },
+  /**
+   * На хуке created проверяем в localStorage ключ userDataFromServer, если его нет, создаем и заполняем данными с сервера, которые получили в хуке 'nuxtServerInit'.
+   * Вне зависимости от результатов проверки выполняем метод fillingFields.
+   */
   created() {
     try {
       if (process.client) {
@@ -398,12 +402,24 @@ export default {
   },
   methods: {
     ...mapActions(["handlerChangeEmail"]),
+    /**
+     * Программный переход на другую страницу, декларативный переход не реализован, 
+     * т.к. компонент vuetify v-select при указании тега <a> через v-slot прекращает всплытие,
+     *  событие click не доходит до тега <a>.
+     */
     getLink() {
       window.open("https://avclick.me/v/AVinfoBot", "_blank");
     },
+    /**
+     * Функция присваивающая полям значения из localStorage
+     */
     fillingFields() {
       const data = JSON.parse(localStorage.getItem("userDataFromServer"));
-      this.switchSIP = Boolean(Number(data.switchSIP));
+      this.switchSIP = Boolean(Number(data.switchSIP)); // *
+      /*
+      * С сервера приходит '0' - строка, при преобразовании в Boolean дающая true, а не false, 
+      * предварительное преобразование в число избавляет от указания дополнительных условий
+      */
       this.companyName = data.companyName;
       this.userName = data.userName;
       this.loginUser = data.loginUser;
@@ -417,19 +433,36 @@ export default {
       this.handleInputTelegram = data.handleInputTelegram;
       this.targetLink = data.targetLink;
     },
+    /**
+     * Функция вызывается при изменении значений в полях, для внесения изменений в localStorage.
+     * @{event} - string, содержащая актуальное значение измененного input/checkbox
+     * @{key} - string, содержащая наименование переменной привязанного к значению input/checkbox
+     */
     saveData(event, key) {
       const rawData = JSON.parse(localStorage.getItem("userDataFromServer"));
       rawData[key] = event;
       localStorage.setItem("userDataFromServer", JSON.stringify(rawData));
     },
+    /**
+     * Функция вызывается при изменении значении часового пояса, для внесения изменений в localStorage.
+     * @{event} - string, содержащая наименование города на кириллице, т.е. значение объекта
+     */
     saveDataTime(event) {
       const valueTimeZone = Object.entries(this.items).filter(
+        // Выбираем объект, фильтруя по значению
         (i) => i[1] === event
       );
       const rawData = JSON.parse(localStorage.getItem("userDataFromServer"));
-      rawData.timeZone = valueTimeZone[0][0];
+      rawData.timeZone = valueTimeZone[0][0]; // Сохраняем только ключ объекта
       localStorage.setItem("userDataFromServer", JSON.stringify(rawData));
     },
+    /**
+     * Небольшая валидация, изменения в email возможна только если стоит отметка об уведомлениях по email и
+     * заполнено поле редактирующее новый email. Далее вызываем action из store, при успешном ответе в
+     * качестве результата получаем текст всплывающего уведомления. Чарез 3 секунды стираем текст уведомления
+     * для автоматического сокрытия уведомления.
+     *
+     */
     async validateNotification() {
       if (this.selectNotification === "email" && this.handleInputEmail) {
         this.resultChangeEmail = await this.handlerChangeEmail(
