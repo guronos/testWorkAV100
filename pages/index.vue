@@ -5,9 +5,10 @@
 <div class="px-4 pt-5 d-flex flex-column settings-section">
 <div class="d-flex setting-block">
   <div class="setting-title">Звонок через SIP <v-switch
+    @change="saveData($event, 'switchSIP')"
                 v-model="switchSIP"
                 color="success"
-                value=true
+                :value=!switchSIP
                 hide-details
                 class="d-inline-block"
               ></v-switch></div>
@@ -17,33 +18,43 @@
   <div class="setting-title">Учётная запись</div>
   <div class="">
       <div class="account-item"><div class="account-item_name">Компания</div><v-text-field
-              label=""
+              @change="saveData($event, 'companyName')"
               class="account-input"
               color="#66BB6A"
+              v-model="companyName"
+              :value="companyName"
               outlined
             ></v-text-field></div>
       <div class="account-item"><div class="account-item_name">Логин</div><v-text-field
-              label=""
+      @change="saveData($event, 'loginUser')"
               class="account-input"
               color="#66BB6A"
+              v-model="loginUser"
+              :value="loginUser"
               outlined
             ></v-text-field></div>
       <div class="account-item"><div class="account-item_name">Номер телефона</div><v-text-field
-              label=""
+      @change="saveData($event, 'phoneNumber')"
               class="account-input"
               color="#66BB6A"
+              v-model="phoneNumber"
+              :value="phoneNumber"
               outlined
             ></v-text-field></div>
     <div class="account-item"><div class="account-item_name">Имя</div><v-text-field
-              label=""
+    @change="saveData($event, 'userName')"
               class="account-input"
               color="#66BB6A"
+              v-model="userName"
+              :value="userName"
               outlined
             ></v-text-field></div>
       <div class="account-item"><div class="account-item_name">Фамилия</div><div><v-text-field
-              label=""
+        @change="saveData($event, 'userLastName')"
               class="account-input"
               color="#66BB6A"
+              v-model="userLastName"
+              :value="userLastName"
               outlined
             ></v-text-field><div class="account-input-comment">* Не обязательно</div></div></div>
   </div>
@@ -58,6 +69,7 @@
   </div>
   <div class="setting-notifications-header mt-5">Уведомления
     <v-radio-group
+    @change="saveData($event, 'selectNotification')"
                 v-model="selectNotification"
                 column
                 class="setting-notifications-radio"
@@ -74,63 +86,246 @@
                   color="primary"
                   value="push"
                   readonly
-                ></v-radio><v-tooltip bottom color="#26a763">
+                  ></v-radio><v-tooltip bottom color="#26a763">
         <template v-slot:activator="{ on, attrs }"><div class="notification-tooltip" v-bind="attrs"
             v-on="on">i</div> </template>
         <span>Можно установить только в приложении</span>
       </v-tooltip></div>
                 <v-divider class="mb-2 pb-4"/>
-                <v-radio
+                <div class="d-flex justify-space-between"><v-radio
                   label="Email"
                   color="primary"
                   value="email"
-                ></v-radio>
+                ></v-radio> 
+                <div v-if="!editEmail" @click="editEmail=true" class="notification-path">
+                {{ handleInputEmail }}<span class="iconify" data-icon="system-uicons:pen" style="color: #6b6;" data-width="22" data-height="22"></span>
+              </div>
+              <div v-else>
+                <v-text-field
+              class="account-input"
+              color="#66BB6A"
+              @change="saveData($event, 'handleInputEmail')"
+              v-model="handleInputEmail"
+              :value="handleInputEmail"
+              outlined
+            ></v-text-field>
+              </div>
+              </div>
                 <v-divider class="mb-2 pb-4"/>
-                <v-radio
-                  label="Telegram ID"
+                <div class="d-flex justify-space-between">
+
+                    <v-radio
+          
                   color="primary"
                   value="telegram"
-                ></v-radio>
+                ><template v-slot:label>
+            <a href="https://avclick.me/v/AVinfoBot" @click="getLink">Telegram ID</a>
+          </template></v-radio>
+            
+
+                <div v-if="!editTelegram" @click="editTelegram=true" class="notification-path">
+                {{ handleInputTelegram }}<span class="iconify" data-icon="system-uicons:pen" style="color: #6b6;" data-width="22" data-height="22"></span>
+              </div>
+              <div v-else>
+                <v-text-field
+              class="account-input"
+              color="#66BB6A"
+              @change="saveData($event, 'handleInputTelegram')"
+              v-model="handleInputTelegram"
+              :value="handleInputTelegram"
+              outlined
+            ></v-text-field>
+              </div>
+            </div>
               </v-radio-group>
   </div></div>
 </div>
 <div class="d-flex setting-block">
   <div class="setting-title">
-    Переход в карточку 
+    Переход в карточку <i class="fa-light fa-pencil" style="color: #2d8643;"></i>
   </div>
+  <div class="d-flex flex-column">
   <div class="setting-body">
-    Выберите, каким образом будет открываться детальное представление выбранного вами транспорта.
+    Выберите, каким образом будет открываться детальное представление выбранного вами транспорта. 
   </div>
+  <v-radio-group
+                v-model="targetLink"
+                column
+                @change="saveData($event, 'targetLink')"
+                class="setting-notifications-radio"
+              >
+                <v-radio
+                  label="В карточку в текущем окне"
+                  color="primary"
+                  value="self"
+                  class="black--text"
+                ></v-radio>
+                <v-divider class="mb-2 pb-4"/>
+                <div class="d-flex justify-space-between"><v-radio
+                  label="В карточку в отдельном окне"
+                  color="primary"
+                  value="blank"
+                ></v-radio></div>
+                <v-divider class="mb-2 pb-4"/>
+                <div class="d-flex justify-space-between"><v-radio
+                  label="На источник"
+                  color="primary"
+                  value="source"
+                ></v-radio> 
+                <v-tooltip bottom color="#26a763">
+        <template v-slot:activator="{ on, attrs }"><div class="notification-tooltip" v-bind="attrs"
+            v-on="on">i</div> </template>
+        <span>Прямой переход в объявление на источнике</span>
+      </v-tooltip>
+              </div>
+              </v-radio-group></div>
 </div>
 <div class="d-flex setting-block">
   <div class="setting-title">
     Прочие настройки
   </div>
-  <div>
-    
+  <div class="setting-notifications-radio">
+    <div class="setting-time setting-notifications-radio d-flex align-baseline">
+      <div class="setting-header-time mr-6">Часовой пояс</div>
+      <div><v-select
+        @change="saveDataTime($event)"
+            :items="Object.values(items)"
+            
+            :value="items[timeZone]"
+            solo
+          ></v-select></div>
+    </div>
+    <div class="d-flex align-end justify-sm-space-between">
+      <v-checkbox
+      @change="saveData($event, 'autoSkip')"
+                v-model="autoSkip"
+                label="Автоматически переходить к новым объявлениям"
+                color="success"
+                :value="autoSkip"
+                hide-details
+                class="other-setting"
+              ></v-checkbox>
+      <div>
+        <v-tooltip bottom color="#26a763">
+        <template v-slot:activator="{ on, attrs }"><div class="notification-tooltip" v-bind="attrs"
+            v-on="on">i</div> </template>
+        <span>Лента будет автоматически обновлятся 1 раз в 3 секунды</span>
+      </v-tooltip>
+      </div>
+    </div>
+    <div class="d-flex align-end justify-sm-space-between">
+      <v-checkbox
+      @change="saveData($event, 'colorInLents')"          
+      v-model="colorInLents"
+                label="Включить цвета в ленте"
+                color="success"
+                :value="colorInLents"
+                hide-details
+                class="other-setting"
+              ></v-checkbox>
+      <div>
+        <v-tooltip bottom color="#26a763">
+        <template v-slot:activator="{ on, attrs }"><div class="notification-tooltip" v-bind="attrs"
+            v-on="on">i</div> </template>
+        <span>Включение зеленого/желтого цвета</span>
+      </v-tooltip>
+      </div>
+    </div>
   </div>
 </div>
+<div class="d-flex setting-block">
+  <div class="setting-title">
+  </div>
+  <div class="save-setting">
+    <div class="setting-notifications-radio d-flex flex-column">
+      <v-divider class="pb-4"/>
+      <v-btn color="#26a763" class="white--text" @click="validateNotification">Сохранить</v-btn></div></div></div>
 </div>
 </main>
  </v-app>
 </template>
 
 <script>
-import { mapGetters, mapMutations, mapActions } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 export default {
   name: 'IndexPage',
+  head: {
+    title: 'TestWork',
+    script: [
+      {
+        src: 'https://code.iconify.design/3/3.1.0/iconify.min.js'
+      }
+    ]
+  },
   data (){
     return {
-      switchSIP : '',
+      switchSIP : false,
+      companyName : '',
+      loginUser : '',
+      phoneNumber : '',
+      userName : '',
+      userLastName : '',
+      handleInputEmail : '',
+      handleInputTelegram : '',
       selectNotification: 'off',
+      editEmail : false,
+      editTelegram : false,
+      targetLink : '',
+      timeZone : 'pass',
+      autoSkip : null,
+      colorInLents : null,
+      items : {'Kaliningrad':'Калининград', 'Moscow':'Москва', 'Samara' : 'Самара', 'Ekaterinburg':'Екатиринбург', 'Omsk':'Омск', 'Krasnoyarsk' : 'Красноярск', 'Magadan' : 'Магадан', 'Vladivostok' : 'Владивосток', 'Yakutsk' : 'Якутск', 'Irkutsk' : 'Иркутск', 'pass' : ''}
     }
   },
-  computed : {
-    ...mapGetters(['getCounter'])
-  }, methods : {
-    ...mapMutations(['increment']),
-    ...mapActions(['get'])
+  created(){
+    try{
+if(process.client) {
+  if (Object.keys(localStorage).includes('userDataFromServer')) {
+  } else {
+localStorage.setItem('userDataFromServer', JSON.stringify(this.getUserData))
   }
+  this.fillingFields()  
+}} catch(e){
+  console.log(e)
+}
+  
+  }, 
+  computed : {
+    ...mapGetters(['getUserData'])
+  }, methods : {
+    ...mapActions(['handlerChangeEmail']),
+    getLink() {
+      window.open('https://avclick.me/v/AVinfoBot', '_blank');
+    }, fillingFields () {
+    const data = JSON.parse(localStorage.getItem('userDataFromServer'))
+    this.switchSIP = Boolean(Number(data.switchSIP));
+    this.companyName = data.companyName;
+    this.userName = data.userName
+    this.loginUser = data.loginUser
+    this.phoneNumber = data.phoneNumber
+    this.selectNotification = data.selectNotification.toLowerCase()
+    this.timeZone = data.timeZone
+    this.colorInLents = data.colorInLents
+    this.autoSkip = data.autoSkip
+    this.userLastName = data.userLastName
+    this.handleInputEmail = data.handleInputEmail
+    this.handleInputTelegram = data.handleInputTelegram
+    this.targetLink = data.targetLink
+  }, saveData(event, key) {
+    const rawData = JSON.parse(localStorage.getItem('userDataFromServer'))
+    rawData[key] = event
+    localStorage.setItem('userDataFromServer', JSON.stringify(rawData))
+  }, saveDataTime (event) {
+    const valueTimeZone = Object.entries(this.items).filter(i=>i[1]===event)
+    const rawData = JSON.parse(localStorage.getItem('userDataFromServer'))
+    rawData['timeZone'] = valueTimeZone[0][0]
+    localStorage.setItem('userDataFromServer', JSON.stringify(rawData))
+  }, validateNotification () {
+    if (this.selectNotification === 'email' && this.handleInputEmail) {
+      this.handlerChangeEmail(this.handleInputEmail)
+    }
+  }
+  },
 }
 </script>
 <style>
@@ -187,6 +382,9 @@ margin-bottom: 2rem;
   font-weight: 600;
   max-width: 37rem;
 }
+.setting-notifications-radio {
+  max-width: 37rem;
+}
 .setting-notifications-radio label {
   font-size: 1.4rem !important;
   color: rgba(0, 0, 0, 1) !important;
@@ -199,5 +397,34 @@ margin-bottom: 2rem;
   height: 2.2rem;
   text-align: center;
   color: #00000070;
+  font-size: 1.5rem;
+}
+.notification-path:hover {
+cursor: pointer;
+}
+.setting-header-time {
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+.save-setting {
+  width: 100%;
+}
+.other-setting label {
+font-size: 1.2rem !important;
+font-weight: 500;
+color: #000 !important;
+}
+#list-55 {
+  background-color: #2dc574;
+  color : #fff;
+}
+.v-list-item__title {
+color :#fff;
+}
+.setting-time * {
+  font-size: 1.2rem !important;
+  max-height: 2.8rem;
+  min-height: auto;
+  max-width: 18.2rem;
 }
 </style>
