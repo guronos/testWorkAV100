@@ -60,6 +60,7 @@ export const actions = {
         {
           headers: {
             Accept: "application/json",
+            "Content-Type": "application/json",
             "X-Api-Key": `${this.state.API_KEY}`,
             "X-User-Token": `${afterAuthorization.token}`,
           },
